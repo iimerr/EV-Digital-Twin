@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Range Prediction - Digital Twin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #00d4ff;
+            text-shadow: 0 0 20px #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 1.1em;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: #aaa;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .form-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #00d4ff;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .result-card {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-card .label {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .result-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00d4ff;
+            text-shadow: 0 0 10px #00d4ff;
+        }
+
+        .result-card .unit {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .battery-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .battery-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        .car-name-display {
+            grid-column: span 2;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .car-name-display .car-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #00d4ff;
+        }
+
+        .error {
+            display: none;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            color: #ff6b6b;
+            margin-top: 15px;
+        }
+
+        .accuracy-badge {
+            display: inline-block;
+            background: rgba(0, 255, 100, 0.1);
+            border: 1px solid rgba(0, 255, 100, 0.3);
+            border-radius: 20px;
+            padding: 5px 15px;
+            color: #00ff64;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .pipeline-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .pipeline-step {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.8em;
+            color: #00d4ff;
+        }
+
+        .arrow {
+            color: #444;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ EV Digital Twin</h1>
+            <p>Real-time Electric Vehicle Range Prediction powered by AWS</p>
+            <div class="pipeline-info">
+                <span class="pipeline-step">IoT Core</span>
+                <span class="arrow">→</span>
+                <span class="pipeline-step">Lambda</span>
+                <span class="arrow">→</span>
+                <span class="pipeline-step">Random Forest ML</span>
+                <span class="arrow">→</span>
+                <span class="pipeline-step">TwinMaker</span>
+                <span class="arrow">→</span>
+                <span class="pipeline-step">Grafana</span>
+            </div>
+        </div>
+
+        <!-- Input Form -->
+        <div class="card">
+            <h2>🚗 Vehicle Parameters</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Car Name</label>
+                    <input type="text" id="carName" placeholder="e.g. Tesla Model Y" value="Tesla Model Y">
+                </div>
+                <div class="form-group">
+                    <label>Battery Level (%)</label>
+                    <input type="number" id="battery" placeholder="0-100" value="75" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Efficiency (Wh/km)</label>
+                    <input type="number" id="efficiency" placeholder="e.g. 172" value="172">
+                </div>
+                <div class="form-group">
+                    <label>Top Speed (km/h)</label>
+                    <input type="number" id="topSpeed" placeholder="e.g. 217" value="217">
+                </div>
+                <div class="form-group">
+                    <label>Fast Charge (kW)</label>
+                    <input type="number" id="fastCharge" placeholder="e.g. 670" value="670">
+                </div>
+                <div class="form-group">
+                    <label>Acceleration (0-100 km/h in s)</label>
+                    <input type="number" id="acceleration" placeholder="e.g. 5.0" value="5.0" step="0.1">
+                </div>
+            </div>
+            <button class="btn" onclick="predictRange()">
+                ⚡ Predict Range
+            </button>
+            <div class="error" id="errorMsg"></div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <p>🔄 Sending to AWS IoT Core → Lambda → ML Model...</p>
+        </div>
+
+        <!-- Results -->
+        <div class="card results" id="results">
+            <h2>📊 Prediction Results</h2>
+            <div class="results-grid">
+                <div class="car-name-display">
+                    <div class="label">Vehicle</div>
+                    <div class="car-title" id="resultCarName">-</div>
+                    <span class="accuracy-badge">✅ Random Forest ML • R² = 0.999</span>
+                </div>
+                <div class="result-card">
+                    <div class="label">Predicted Range (Full Battery)</div>
+                    <div class="value" id="resultPredicted">-</div>
+                    <div class="unit">kilometers</div>
+                </div>
+                <div class="result-card">
+                    <div class="label">Current Range</div>
+                    <div class="value" id="resultCurrent">-</div>
+                    <div class="unit">kilometers</div>
+                </div>
+                <div class="result-card">
+                    <div class="label">Battery Level</div>
+                    <div class="value" id="resultBattery">-</div>
+                    <div class="unit">percent</div>
+                    <div class="battery-bar">
+                        <div class="battery-fill" id="batteryFill"></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <div class="label">TwinMaker Status</div>
+                    <div class="value" style="font-size: 1.5em;">✅</div>
+                    <div class="unit">Digital Twin Updated</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://cn4qdnn18k.execute-api.ap-southeast-2.amazonaws.com/prod/predict';
+
+        async function predictRange() {
+            const carName = document.getElementById('carName').value;
+            const battery = parseFloat(document.getElementById('battery').value);
+            const efficiency = parseFloat(document.getElementById('efficiency').value);
+            const topSpeed = parseFloat(document.getElementById('topSpeed').value);
+            const fastCharge = parseFloat(document.getElementById('fastCharge').value);
+            const acceleration = parseFloat(document.getElementById('acceleration').value);
+
+            if (!carName || isNaN(battery) || isNaN(efficiency) || isNaN(topSpeed)) {
+                showError('Please fill in all fields correctly');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('errorMsg').style.display = 'none';
+
+            const payload = {
+                Car_name: carName,
+                Battery: battery,
+                Range: 0,
+                Efficiency: efficiency,
+                Top_speed: topSpeed,
+                Fast_charge: fastCharge,
+                'acceleration..0.100.': acceleration
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                const body = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
+
+                document.getElementById('loading').style.display = 'none';
+
+                document.getElementById('resultCarName').textContent = body.car_name;
+                document.getElementById('resultPredicted').textContent = body.predicted_range_km + ' km';
+                document.getElementById('resultCurrent').textContent = body.current_range_km + ' km';
+                document.getElementById('resultBattery').textContent = body.battery_level + '%';
+
+                const batteryFill = document.getElementById('batteryFill');
+                batteryFill.style.width = body.battery_level + '%';
+                if (body.battery_level < 20) {
+                    batteryFill.style.background = '#ff4444';
+                } else if (body.battery_level < 50) {
+                    batteryFill.style.background = '#ffaa00';
+                } else {
+                    batteryFill.style.background = '#00ff64';
+                }
+
+                document.getElementById('results').style.display = 'block';
+
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                showError('Failed to connect to AWS. Check your API URL. Error: ' + error.message);
+            }
+        }
+
+        function showError(msg) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = msg;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
