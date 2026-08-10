@@ -1,0 +1,64 @@
+{
+  "workspaceId": "evtwin",
+  "isSingleton": false,
+  "componentTypeId": "com.ev.vehicle.data",
+  "propertyDefinitions": {
+    "Actual_Range": {
+      "dataType": {
+        "type": "DOUBLE"
+      },
+      "isTimeSeries": false,
+      "isRequiredInEntity": false,
+      "isExternalId": false,
+      "isStoredExternally": false,
+      "isImported": false,
+      "isFinal": false,
+      "isInherited": false
+    },
+    "Battery_Level": {
+      "dataType": {
+        "type": "DOUBLE"
+      },
+      "isTimeSeries": false,
+      "isRequiredInEntity": false,
+      "isExternalId": false,
+      "isStoredExternally": false,
+      "isImported": false,
+      "isFinal": false,
+      "isInherited": false
+    },
+    "Car_name": {
+      "dataType": {
+        "type": "STRING"
+      },
+      "isTimeSeries": false,
+      "isRequiredInEntity": false,
+      "isExternalId": false,
+      "isStoredExternally": false,
+      "isImported": false,
+      "isFinal": false,
+      "isInherited": false
+    },
+    "Predicted_Range": {
+      "dataType": {
+        "type": "DOUBLE"
+      },
+      "isTimeSeries": false,
+      "isRequiredInEntity": false,
+      "isExternalId": false,
+      "isStoredExternally": false,
+      "isImported": false,
+      "isFinal": false,
+      "isInherited": false
+    }
+  },
+  "creationDateTime": "2026-04-03T14:13:09.623Z",
+  "updateDateTime": "2026-04-03T14:13:09.623Z",
+  "arn": "arn:aws:iottwinmaker:ap-southeast-2:706914616163:workspace/evtwin/component-type/com.ev.vehicle.data",
+  "isAbstract": false,
+  "isSchemaInitialized": false,
+  "status": {
+    "state": "ACTIVE",
+    "error": {}
+  }
+}
